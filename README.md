@@ -155,3 +155,42 @@ by your site.
 `is_saving_sitemaps`: Determines if sitemaps will be written to disk (bool)
 
 `has_wellknown_at_root`: Where is the description document {.well-known/resourcesync} on the server (bool)
+
+
+## OAI-PMH Generator
+
+An OAI-PMH generator for py-resourcesync exists in `resourcesync/generators`. It is for the PRRLA project.
+
+### Dev environment setup
+
+```bash
+virtualenv -p python3 venv-py-resourcesync
+source venv-py-resourcesync/bin/activate
+pip install beautifulsoup4 resync Sickle validators
+git apply --3way unrestrict-domain-name.patch # allows us to test locally
+```
+
+### Usage
+
+```python
+from resourcesync.resourcesync import ResourceSync
+
+endpoint = 'http://digital2.library.ucla.edu/oai2_0.do'
+collectionName = 'apam' # or None
+metadataPrefix = 'oai_dc'
+
+rs = ResourceSync(
+    resource_dir='/where/resource/data/will/go/resourcesync/', # '/var/www/html/resourcesync/'
+    metadata_dir=collectionName,
+    description_dir='/var/www/html/',
+    url_prefix='http://your-server.edu/where/resource/data/will/go/resourcesync/', # 'http://digital2.library.ucla.edu/resourcesync/'
+    document_root='/var/www/html/',
+    generator='OAIPMHGenerator',
+    is_saving_sitemaps=True,
+    has_wellknown_at_root=True,
+    generator_params={'OAIPMHEndpoint': endpoint,
+                      'OAIPMHSet': collectionName,
+                      'OAIPMHMetadataPrefix': metadataPrefix)
+
+rs.execute()
+```

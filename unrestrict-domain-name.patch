@@ -1,0 +1,17 @@
+diff --git a/resourcesync/parameters/parameters.py b/resourcesync/parameters/parameters.py
+index 5526928..d4d7380 100644
+--- a/resourcesync/parameters/parameters.py
++++ b/resourcesync/parameters/parameters.py
+@@ -166,9 +166,9 @@ class ParameterUtils(object):
+         parts = urllib.parse.urlparse(value)
+         if parts[0] not in ["http", "https"]:  # scheme
+             raise ValueError("URL schemes allowed are 'http' or 'https'. Given: '%s'" % value)
+-        is_valid_domain = validators.domain(parts[1])  # netloc
+-        if not is_valid_domain:
+-            raise ValueError("URL has invalid domain name: '%s'. Given: '%s'" % (parts[1], value))
++        #is_valid_domain = validators.domain(parts[1])  # netloc
++        #if not is_valid_domain:
++            #raise ValueError("URL has invalid domain name: '%s'. Given: '%s'" % (parts[1], value))
+         if parts[4] != "":  # query
+             raise ValueError("URL should not have a query string. Given: '%s'" % value)
+         if parts[5] != "":  # fragment
