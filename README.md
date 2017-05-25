@@ -163,11 +163,12 @@ An OAI-PMH generator for py-resourcesync exists in `resourcesync/generators`. It
 
 ### Dev environment setup
 
+In addition to the setup instructions above, you need a few more packages in your development environment:
+
 ```bash
-virtualenv -p python3 venv-py-resourcesync
-source venv-py-resourcesync/bin/activate
-pip install beautifulsoup4 resync Sickle validators
-git apply --3way unrestrict-domain-name.patch # allows us to test locally
+pip3 install beautifulsoup4 resync Sickle validators
+git apply unrestrict-domain-name.patch # allows us to test locally
+mkdir /var/www/html/resourcesync/ # serving with httpd
 ```
 
 ### Usage
@@ -175,8 +176,9 @@ git apply --3way unrestrict-domain-name.patch # allows us to test locally
 ```python
 from resourcesync.resourcesync import ResourceSync
 
-endpoint = 'http://digital2.library.ucla.edu/oai2_0.do'
-collectionName = 'apam' # or None
+endpoint = 'http://digital2.library.ucla.edu/oai2_0.do' # OAI-PMH endpoint
+collectionName = 'apam'
+setName = collectionName # or None, if the "set" parameter is not included in the query string for ListIdentifiers and ListRecords requests
 metadataPrefix = 'oai_dc'
 
 rs = ResourceSync(
@@ -189,7 +191,7 @@ rs = ResourceSync(
     is_saving_sitemaps=True,
     has_wellknown_at_root=True,
     generator_params={'OAIPMHEndpoint': endpoint,
-                      'OAIPMHSet': collectionName,
+                      'OAIPMHSet': setName,
                       'OAIPMHMetadataPrefix': metadataPrefix)
 
 rs.execute()
