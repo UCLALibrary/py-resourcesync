@@ -15,9 +15,7 @@ from bs4 import BeautifulSoup
 class OAIPMHGenerator(Generator):
     """Generator class for connecting OAI-PMH harvests to ResourceSync.
 
-    In order to use this generator, `ResourceSync` must have been called with
-    a special kwarg called `generator_params`. It is a dict with the following
-    properties, all strings:
+    The following parameters are required for its use:
 
     OAIPMHEndpoint - URL fragment to which query parameters are appended
     OAIPMHMetadataPrefix - metadata prefix query param
@@ -30,10 +28,10 @@ class OAIPMHGenerator(Generator):
 
     def generate(self):
 
-        provider = Sickle(self.params.generator_params['OAIPMHEndpoint'])
+        provider = Sickle(self.params.OAIPMHEndpoint)
         headers = provider.ListIdentifiers(
-            metadataPrefix=self.params.generator_params['OAIPMHMetadataPrefix'],
-            set=self.params.generator_params['OAIPMHSet'])
+            metadataPrefix=self.params.OAIPMHMetadataPrefix,
+            set=self.params.OAIPMHSet)
 
         return list(map(self.oaiToResourceSync, headers))
 
@@ -47,9 +45,9 @@ class OAIPMHGenerator(Generator):
         soup = BeautifulSoup(header.raw.encode('utf-8'), 'xml')
 
         uri = '{}?verb=GetRecord&identifier={}&metadataPrefix={}'.format(
-            self.params.generator_params['OAIPMHEndpoint'],
+            self.params.OAIPMHEndpoint,
             soup.identifier.text,
-            self.params.generator_params['OAIPMHMetadataPrefix'])
+            self.params.OAIPMHMetadataPrefix)
 
         r = get(uri)
 
