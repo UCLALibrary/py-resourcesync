@@ -159,16 +159,18 @@ by your site.
 
 ## OAI-PMH Generator
 
-An OAI-PMH generator for py-resourcesync exists in `resourcesync/generators`. It is for the PRRLA project.
+An OAI-PMH generator for py-resourcesync exists in `resourcesync/generators`, allowing institutions to bootstrap a ResourceSync-compatible repository using their existing OAI-PMH repository.
 
-### Dev environment setup
+The code snippets below use filesystem paths for institutions that will be using `httpd` to serve their ResourceSync documents.
 
-In addition to the setup instructions above, you need a few more packages in your development environment:
+### Installation
+
+In addition to the setup instructions [above](#installation-from-source), do the following:
 
 ```bash
-pip3 install beautifulsoup4 resync Sickle validators
-git apply unrestrict-domain-name.patch # allows us to test locally
-mkdir /var/www/html/resourcesync/ # serving with httpd
+pip3 install beautifulsoup4 Sickle validators # not tested with Python 2
+git apply unrestrict-domain-name.patch # allows us to test locally -- do not do this on production!
+mkdir /var/www/html/resourcesync/ # create a place for the ResourceSync documents -- in this case, our server is httpd
 ```
 
 ### Usage
@@ -176,23 +178,27 @@ mkdir /var/www/html/resourcesync/ # serving with httpd
 ```python
 from resourcesync.resourcesync import ResourceSync
 
-endpoint = 'http://digital2.library.ucla.edu/oai2_0.do' # OAI-PMH endpoint
+httpdDocumentRoot = '/var/www/html'
+resourceDir = 'resourcesync'
 collectionName = 'apam'
-setName = collectionName # or None, if the "set" parameter is not included in the query string for ListIdentifiers and ListRecords requests
-metadataPrefix = 'oai_dc'
+resourceSyncUrl = 'http://your-resourcecync-server.edu'
+
+OAIPMHBaseURL = 'http://your-oaipmh-server.edu/oai/provider' # your-oaipmh-server may be the same as your-resourcesync-server
+OAIPMHSet = collectionName # or None, if the "set" parameter is not used in the query string for ListIdentifiers and ListRecords requests (i.e., each record set has a distinct base URL)
+OAIPMHMetadataPrefix = 'oai_dc'
 
 rs = ResourceSync(
-    resource_dir='/where/resource/data/will/go/resourcesync/', # '/var/www/html/resourcesync/'
+    resource_dir='{}/{}'.format(httpdDocumentRoot, resourceDir),
     metadata_dir=collectionName,
-    description_dir='/var/www/html/',
-    url_prefix='http://your-server.edu/where/resource/data/will/go/resourcesync/', # 'http://digital2.library.ucla.edu/resourcesync/'
-    document_root='/var/www/html/',
+    description_dir=httpdDocumentRoot,
+    url_prefix='{}/{}'.format(resourceSyncUrl, resourceDir),
+    document_root=httpdDocumentRoot,
     generator='OAIPMHGenerator',
     is_saving_sitemaps=True,
     has_wellknown_at_root=True,
-    generator_params={'OAIPMHEndpoint': endpoint,
-                      'OAIPMHSet': setName,
-                      'OAIPMHMetadataPrefix': metadataPrefix)
+    OAIPMHBaseURL=OAIPMHBaseURL,
+    OAIPMHSet=OAIPMHSet,
+    OAIPMHMetadataPrefix=OAIPMHMetadataPrefix)
 
 rs.execute()
 ```

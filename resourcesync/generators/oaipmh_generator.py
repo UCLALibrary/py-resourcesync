@@ -13,22 +13,30 @@ from requests import get
 from bs4 import BeautifulSoup
 
 class OAIPMHGenerator(Generator):
-    """Generator class for connecting OAI-PMH harvests to ResourceSync.
+    """Generator class for using ResourceSync with OAI-PMH records.
 
-    The following parameters are required for its use:
+    In order to use this generator, the following additional key word
+    arguments must be passed to the ResourceSync class constructor:
 
-    OAIPMHEndpoint - URL fragment to which query parameters are appended
-    OAIPMHMetadataPrefix - metadata prefix query param
-    OAIPMHSet - set query param
+    OAIPMHBaseURL           the base URL for OAI-PMH requests, to which
+        query parameters are appended to form the full request URL
+    OAIPMHMetadataPrefix    the metadata prefix argument, as defined in
+        https://www.openarchives.org/OAI/openarchivesprotocol.html#MetadataNamespaces
+    OAIPMHSet               the set argument, as defined in
+        https://www.openarchives.org/OAI/openarchivesprotocol.html#Set
     """
-    # TODO: add more OAI-PMH params
     def __init__(self, params, rsxml=None):
 
         Generator.__init__(self, params, rsxml=rsxml)
 
     def generate(self):
+        """Returns a list of ResourceSync resources that each represent one
+        full OAI-PMH record (i.e., the result of a GetRecord request).
+        """
 
-        provider = Sickle(self.params.OAIPMHEndpoint)
+        provider = Sickle(self.params.OAIPMHBaseURL)
+
+        # TODO: add more OAI-PMH params
         headers = provider.ListIdentifiers(
             metadataPrefix=self.params.OAIPMHMetadataPrefix,
             set=self.params.OAIPMHSet)
@@ -36,19 +44,17 @@ class OAIPMHGenerator(Generator):
         return list(map(self.oaiToResourceSync, headers))
 
     def oaiToResourceSync(self, header):
-        """Maps an OAI-PMH identifier to a ResourceSync Resource.
-
-        https://github.com/resync/resync/blob/master/resync/resource.py
-        """
+        """Maps an OAI-PMH record identifier to a ResourceSync Resource."""
         # TODO: logging
 
         soup = BeautifulSoup(header.raw.encode('utf-8'), 'xml')
 
         uri = '{}?verb=GetRecord&identifier={}&metadataPrefix={}'.format(
-            self.params.OAIPMHEndpoint,
+            self.params.OAIPMHBaseURL,
             soup.identifier.text,
             self.params.OAIPMHMetadataPrefix)
 
+        # do a GET request for each record
         r = get(uri)
 
         lastmod = soup.header.datestamp.text
@@ -57,7 +63,8 @@ class OAIPMHGenerator(Generator):
         m.update(uri.encode('utf-8'))
         m = m.hexdigest()
 
-        length = len(r.content) # or, r.headers['Content-Length'], if available
+        # TODO: use r.headers['Content-Length'], if available
+        length = len(r.content)
 
         mime_type = r.headers['Content-Type']
 

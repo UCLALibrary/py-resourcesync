@@ -15,7 +15,7 @@ class OAIPMHGeneratorTest(unittest.TestCase):
         rs = ResourceSync(
             strategy=0,
             generator="OAIPMHGenerator",
-            OAIPMHEndpoint="http://digital2.library.ucla.edu/oai2_0.do",
+            OAIPMHBaseURL="http://digital2.library.ucla.edu/oai2_0.do",
             OAIPMHSet="apam",
             OAIPMHMetadataPrefix="oai_dc"
         )
