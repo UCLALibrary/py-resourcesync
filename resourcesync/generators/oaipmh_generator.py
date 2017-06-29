@@ -25,7 +25,7 @@ class OAIPMHGenerator(Generator):
     OAIPMHSet               the set argument, as defined in
         https://www.openarchives.org/OAI/openarchivesprotocol.html#Set
     """
-    def __init__(self, params, rsxml=None):
+    def __init__(self, params=None, rsxml=None):
 
         Generator.__init__(self, params, rsxml=rsxml)
 
