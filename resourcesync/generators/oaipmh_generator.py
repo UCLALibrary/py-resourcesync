@@ -34,12 +34,12 @@ class OAIPMHGenerator(Generator):
         full OAI-PMH record (i.e., the result of a GetRecord request).
         """
 
-        provider = Sickle(self.params.OAIPMHBaseURL)
+        provider = Sickle(self.params['OAIPMHBaseURL'])
 
         # TODO: add more OAI-PMH params
         headers = provider.ListIdentifiers(
-            metadataPrefix=self.params.OAIPMHMetadataPrefix,
-            set=self.params.OAIPMHSet)
+            metadataPrefix=self.params['OAIPMHMetadataPrefix'],
+            set=self.params['OAIPMHSet'])
 
         return list(map(self.oaiToResourceSync, headers))
 
@@ -50,9 +50,9 @@ class OAIPMHGenerator(Generator):
         soup = BeautifulSoup(header.raw.encode('utf-8'), 'xml')
 
         uri = '{}?verb=GetRecord&identifier={}&metadataPrefix={}'.format(
-            self.params.OAIPMHBaseURL,
+            self.params['OAIPMHBaseURL'],
             soup.identifier.text,
-            self.params.OAIPMHMetadataPrefix)
+            self.params['OAIPMHMetadataPrefix'])
 
         # do a GET request for each record
         r = get(uri)
