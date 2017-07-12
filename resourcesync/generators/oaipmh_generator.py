@@ -41,13 +41,17 @@ class OAIPMHGenerator(Generator):
             metadataPrefix=self.params['OAIPMHMetadataPrefix'],
             set=self.params['OAIPMHSet'])
 
-        return list(map(self.oaiToResourceSync, headers))
+        return list(filter(lambda x: x != None, map(self.oaiToResourceSync, headers)))
 
     def oaiToResourceSync(self, header):
         """Maps an OAI-PMH record identifier to a ResourceSync Resource."""
         # TODO: logging
 
         soup = BeautifulSoup(header.raw.encode('utf-8'), 'xml')
+
+        # ignore deleted records
+        if (soup.header.get('status') == 'deleted'):
+            return None
 
         uri = '{}?verb=GetRecord&identifier={}&metadataPrefix={}'.format(
             self.params['OAIPMHBaseURL'],
@@ -58,13 +62,14 @@ class OAIPMHGenerator(Generator):
         r = get(uri)
 
         lastmod = soup.header.datestamp.text
+        body = str(BeautifulSoup(r.content, 'xml').GetRecord).encode('utf-8')
 
+        # compute MD5 of the body
         m = md5()
-        m.update(uri.encode('utf-8'))
+        m.update(body)
         m = m.hexdigest()
 
-        # TODO: use r.headers['Content-Length'], if available
-        length = len(r.content)
+        length = len(body)
 
         mime_type = r.headers['Content-Type']
 
