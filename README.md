@@ -172,37 +172,44 @@ The code snippets below use filesystem paths for institutions that will be using
 In addition to the setup instructions [above](#installation-from-source), do the following:
 
 ```bash
-pip3 install beautifulsoup4 Sickle validators # not tested with Python 2
-git apply unrestrict-domain-name.patch # allows us to test locally -- do not do this on production!
-mkdir /var/www/html/resourcesync/ # create a place for the ResourceSync documents -- in this case, our server is httpd
+$ pip3 install beautifulsoup4 Sickle validators
+$ pip3 install requests-mock # if you want to run the tests
 ```
 
 ### Usage
 
+There must exist a directory at the path specified by `resource_dir`. For `httpd`:
+
+```bash
+$ mkdir /var/www/html/resourcesync/ # create a place for the ResourceSync documents
+```
+
+Then, with Python:
+
 ```python
-from resourcesync.resourcesync import ResourceSync
-
-httpdDocumentRoot = '/var/www/html'
-resourceDir = 'resourcesync'
-collectionName = 'apam'
-resourceSyncUrl = 'http://your-resourcecync-server.edu'
-
-OAIPMHBaseURL = 'http://your-oaipmh-server.edu/oai/provider' # your-oaipmh-server may be the same as your-resourcesync-server
-OAIPMHSet = collectionName # or None, if the "set" parameter is not used in the query string for ListIdentifiers and ListRecords requests (i.e., each record set has a distinct base URL)
-OAIPMHMetadataPrefix = 'oai_dc'
-
-rs = ResourceSync(
-    resource_dir='{}/{}'.format(httpdDocumentRoot, resourceDir),
-    metadata_dir=collectionName,
-    description_dir=httpdDocumentRoot,
-    url_prefix='{}/{}'.format(resourceSyncUrl, resourceDir),
-    document_root=httpdDocumentRoot,
-    generator='OAIPMHGenerator',
-    is_saving_sitemaps=True,
-    has_wellknown_at_root=True,
-    OAIPMHBaseURL=OAIPMHBaseURL,
-    OAIPMHSet=OAIPMHSet,
-    OAIPMHMetadataPrefix=OAIPMHMetadataPrefix)
-
-rs.execute()
+>>> from resourcesync.resourcesync import ResourceSync
+>>> from resourcesync.generators.oaipmh_generator import OAIPMHGenerator
+>>>
+>>> httpdDocumentRoot = '/var/www/html'
+>>> resourceDir = 'resourcesync'
+>>> collectionName = 'test'
+>>> resourceSyncUrl = 'http://your-resourcecync-server.edu'
+>>>
+>>> OAIPMHBaseURL = 'http://your-oaipmh-server.edu/oai/provider' # your-oaipmh-server may be the same as your-resourcesync-server
+>>> OAIPMHSet = collectionName # or None, if the "set" parameter is not used in the query string for ListIdentifiers and ListRecords requests (i.e., each record set has a distinct base URL)
+>>> OAIPMHMetadataPrefix = 'oai_dc'
+>>>
+>>> my_generator = OAIPMHGenerator(params={
+...     'OAIPMHBaseURL': OAIPMHBaseURL,
+...     'OAIPMHSet': OAIPMHSet,
+...     'OAIPMHMetadataPrefix': OAIPMHMetadataPrefix})
+>>>
+>>> rs = ResourceSync(generator=my_generator,
+...                   strategy=0,
+...                   resource_dir='{}/{}'.format(httpdDocumentRoot, resourceDir),
+...                   metadata_dir=collectionName,
+...                   description_dir=httpdDocumentRoot,
+...                   url_prefix='{}/{}'.format(resourceSyncUrl, resourceDir),
+...                   is_saving_sitemaps=True)
+>>> rs.execute()
 ```
