@@ -37,21 +37,17 @@ class OAIPMHGenerator(Generator):
         provider = Sickle(self.params['OAIPMHBaseURL'])
 
         # TODO: add more OAI-PMH params
-        headers = provider.ListIdentifiers(
+        headers = provider.ListIdentifiers(ignore_deleted=True,
             metadataPrefix=self.params['OAIPMHMetadataPrefix'],
             set=self.params['OAIPMHSet'])
 
-        return list(filter(lambda x: x != None, map(self.oaiToResourceSync, headers)))
+        return list(map(self.oaiToResourceSync, headers))
 
     def oaiToResourceSync(self, header):
         """Maps an OAI-PMH record identifier to a ResourceSync Resource."""
         # TODO: logging
 
         soup = BeautifulSoup(header.raw.encode('utf-8'), 'xml')
-
-        # ignore deleted records
-        if (soup.header.get('status') == 'deleted'):
-            return None
 
         uri = '{}?verb=GetRecord&identifier={}&metadataPrefix={}'.format(
             self.params['OAIPMHBaseURL'],
