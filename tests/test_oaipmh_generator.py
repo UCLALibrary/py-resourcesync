@@ -11,22 +11,22 @@ import logging
 LOG = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
+# TODO: change camelcase to underscore_var
 
 class OAIPMHGeneratorTest(unittest.TestCase):
 
     def setUp(self):
-        self.OAIPMHBaseURL        = "http://example.com/oai"
-        self.OAIPMHSet            = "test"
-        self.OAIPMHMetadataPrefix = "oai_dc"
+        self.OAIPMHBaseURL         = "http://example.com/oai"
+        self.OAIPMHSet             = "test"
+        self.OAIPMHMetadataPrefix  = "oai_dc"
         self.OAIPMHGeneratorParams = {
-            'OAIPMHBaseURL':        self.OAIPMHBaseURL,
-            'OAIPMHSet':            self.OAIPMHSet,
-            'OAIPMHMetadataPrefix': self.OAIPMHMetadataPrefix
-            }
+            "OAIPMHBaseURL":        self.OAIPMHBaseURL,
+            "OAIPMHSet":            self.OAIPMHSet,
+            "OAIPMHMetadataPrefix": self.OAIPMHMetadataPrefix }
 
         self.GetRecordURLTemplate       = "{}?verb=GetRecord&identifier={}&metadataPrefix={}"
         self.ListIdentifiersURLTemplate = "{}?verb=ListIdentifiers&set={}&metadataPrefix={}"
-        self.httpResponseHeaders        = {"content-type": "text/xml"}
+        self.httpResponseHeaders        = { "content-type": "text/xml" }
 
     def test_generate(self):
 

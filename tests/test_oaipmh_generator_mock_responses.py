@@ -1,6 +1,8 @@
 # `mock_responses` is a list of dictionaries, indexed by the test number (in `test_oaipmh_generator.py`) in which they're referenced.
 # Each dictionary maps mock HTTP GET target URLs to the corresponding mock text/xml response body.
 
+# TODO: indent
+
 mock_responses = [
     {
         "http://example.com/oai?verb=GetRecord&identifier=A&metadataPrefix=oai_dc": """
